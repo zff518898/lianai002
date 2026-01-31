@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗恋探测器 - 有没有人在暗恋你？</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary: #ff6b8b;
+            --secondary: #8a2be2;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #4cd964;
+            --warning: #ffcc00;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e6e9ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+            animation: float 20s linear infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .progress-container {
+            padding: 20px 30px 0;
+            background-color: rgba(255,255,255,0.9);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .question-container {
+            padding: 40px 30px;
+            display: block;
+        }
+        
+        .result-container {
+            padding: 40px 30px;
+            display: none;
+        }
+        
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            color: var(--dark);
+            line-height: 1.5;
+            text-align: center;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            padding: 18px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        
+        .option:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .option.selected {
+            border-color: var(--primary);
+            background-color: rgba(255, 107, 139, 0.05);
+        }
+        
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .option.selected .option-letter {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-prev {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            border: 2px solid #dee2e6;
+        }
+        
+        .btn-prev:hover {
+            background-color: #e9ecef;
+        }
+        
+        .btn-next {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 139, 0.3);
+        }
+        
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 139, 0.4);
+        }
+        
+        .btn-restart {
+            background: linear-gradient(90deg, var(--warning) 0%, #ff9500 100%);
+            color: white;
+            margin-top: 30px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+        }
+        
+        .btn-restart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 204, 0, 0.4);
+        }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .result-title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .match-percentage {
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 20px 0;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-type {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .result-desc {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            color: #495057;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .predictions {
+            background-color: rgba(138, 43, 226, 0.05);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .predictions h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .predictions h3 i {
+            margin-right: 10px;
+        }
+        
+        .prediction-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .prediction-item i {
+            color: var(--success);
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+        
+        .actions {
+            background-color: rgba(255, 107, 139, 0.05);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .actions h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .actions h3 i {
+            margin-right: 10px;
+        }
+        
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            counter-increment: action-counter;
+        }
+        
+        .action-item::before {
+            content: counter(action-counter);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .share-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .share-title {
+            margin-bottom: 20px;
+            color: var(--dark);
+            font-size: 1.2rem;
+        }
+        
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .share-btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .share-whatsapp {
+            background-color: #25D366;
+            color: white;
+        }
+        
+        .share-wechat {
+            background-color: #09BB07;
+            color: white;
+        }
+        
+        .share-copy {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .share-btn i {
+            margin-right: 8px;
+        }
+        
+        .share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #e9ecef;
+            margin-top: 30px;
+        }
+        
+        .heart {
+            color: var(--primary);
+            animation: heartbeat 1.5s ease infinite;
+            display: inline-block;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .secret-admirer {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .question { font-size: 1.2rem; }
+            .option { padding: 15px; }
+            .match-percentage { font-size: 4rem; }
+            .result-title { font-size: 1.8rem; }
+            .result-type { font-size: 1.5rem; }
+            button { padding: 12px 20px; }
+        }
+        
+        @media (max-width: 480px) {
+            .container { border-radius: 15px; }
+            .header { padding: 20px 15px; }
+            .question-container, .result-container { padding: 25px 20px; }
+            .match-percentage { font-size: 3.5rem; }
+            .share-buttons { flex-direction: column; }
+            .share-btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>暗恋探测器</h1>
+            <div class="subtitle">有没有人在暗恋你？</div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span>暗恋指数测试</span>
+                <span id="progressText">0/5</span>
+            </div>
+        </div>
+        
+        <!-- 测试问题部分 -->
+        <div class="question-container" id="questionContainer">
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="buttons">
+                <button class="btn-prev" id="prevBtn">
+                    <i class="fas fa-arrow-left"></i> 上一题
+                </button>
+                <button class="btn-next" id="nextBtn">
+                    下一题 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 测试结果部分 -->
+        <div class="result-container" id="resultContainer">
+            <div class="result-header">
+                <div class="result-title">测试结果</div>
+                <div class="match-percentage" id="matchPercentage">85%</div>
+                <div class="result-type" id="resultType">高度暗恋可能</div>
+                <div class="secret-admirer" id="secretAdmirer"></div>
+            </div>
+            
+            <div class="result-desc" id="resultDesc">
+                根据你的回答分析，你身边极有可能存在暗恋者！你的独特魅力和温暖性格吸引了TA的目光，只是TA可能还没有鼓起勇气向你表白。
+            </div>
+            
+            <div class="predictions">
+                <h3><i class="fas fa-crystal-ball"></i> 专属预测</h3>
+                <div id="predictionsList">
+                    <div class="prediction-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>未来一个月内，你会收到意想不到的关注或暗示</div>
+                    </div>
+                    <div class="prediction-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>TA可能会通过共同朋友传递好感信号</div>
+                    </div>
+                    <div class="prediction-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>你们的互动频率将在近期有所增加</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <h3><i class="fas fa-lightbulb"></i> 行动建议</h3>
+                <div id="actionsList">
+                    <div class="action-item">
+                        <div>多留意身边人对你的特别关注和细微变化</div>
+                    </div>
+                    <div class="action-item">
+                        <div>保持开放的心态，给自己和他人更多交流机会</div>
+                    </div>
+                    <div class="action-item">
+                        <div>如果遇到心动对象，不妨主动释放一些友好信号</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-restart" id="restartBtn">
+                <i class="fas fa-redo"></i> 重新测试
+            </button>
+            
+            <div class="share-section">
+                <div class="share-title">分享给你的朋友，看看TA的暗恋指数！</div>
+                <div class="share-buttons">
+                    <a class="share-btn share-whatsapp" id="shareWhatsApp">
+                        <i class="fab fa-whatsapp"></i> 心鸟心理服务
+                    </a>
+                    <a class="share-btn share-wechat" id="shareWeChat">
+                        <i class="fab fa-weixin"></i> 微信
+                    </a>
+                    <a class="share-btn share-copy" id="copyLink">
+                        <i class="fas fa-copy"></i> 复制链接
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>本测试基于心理学中的吸引力与暗恋行为研究设计，仅供娱乐参考</p>
+            <p>探索更多心理奥秘，请关注 <span style="color: var(--secondary); font-weight: bold;">心鸟心理服务</span> <span class="heart">❤</span></p>
+        </div>
+    </div>
+
+    <script>
+        // 测试数据 - 暗恋测试
+        const questions = [
+            {
+                text: "最近有没有人经常主动找你聊天？",
+                options: [
+                    { text: "是的，有1-2个人经常找我", score: 8 },
+                    { text: "有几个人会偶尔联系我", score: 6 },
+                    { text: "不太确定，但感觉有人关注我", score: 7 },
+                    { text: "没有特别明显的", score: 5 }
+                ]
+            },
+            {
+                text: "你发现有人经常在社交媒体上给你点赞/评论吗？",
+                options: [
+                    { text: "有固定几个人总是第一时间互动", score: 9 },
+                    { text: "偶尔会收到一些人的点赞", score: 6 },
+                    { text: "有人会特别评论我的动态", score: 8 },
+                    { text: "没有特别注意到", score: 4 }
+                ]
+            },
+            {
+                text: "当你在人群中时，是否感觉有目光追随着你？",
+                options: [
+                    { text: "经常有这种感觉", score: 9 },
+                    { text: "偶尔会注意到", score: 7 },
+                    { text: "不确定，但有时候觉得是", score: 6 },
+                    { text: "没有特别注意过", score: 5 }
+                ]
+            },
+            {
+                text: "最近有没有收到意外的关心或小礼物？",
+                options: [
+                    { text: "有收到过暖心的小惊喜", score: 9 },
+                    { text: "有人会特别关心我的近况", score: 8 },
+                    { text: "偶尔会收到问候", score: 6 },
+                    { text: "没有特别的", score: 4 }
+                ]
+            },
+            {
+                text: "你觉得自己的魅力指数如何？",
+                options: [
+                    { text: "很有自信，知道自己有吸引力", score: 9 },
+                    { text: "中等偏上，有一定魅力", score: 8 },
+                    { text: "普通，但有自己的优点", score: 7 },
+                    { text: "没太想过这个问题", score: 5 }
+                ]
+            }
+        ];
+
+        // 结果类型数据 - 暗恋测试
+        const resultTypes = [
+            {
+                minScore: 35,
+                maxScore: 45,
+                name: "高度暗恋可能",
+                desc: "根据你的回答分析，你身边极有可能存在暗恋者！你的独特魅力和温暖性格吸引了TA的目光，只是TA可能还没有鼓起勇气向你表白。",
+                admirer: "暗恋者特征：可能是你社交圈中比较熟悉的人，对你的喜好很了解",
+                predictions: [
+                    "未来一个月内，你会收到意想不到的关注或暗示",
+                    "TA可能会通过共同朋友传递好感信号",
+                    "你们的互动频率将在近期有所增加"
+                ],
+                actions: [
+                    "多留意身边人对你的特别关注和细微变化",
+                    "保持开放的心态，给自己和他人更多交流机会",
+                    "如果遇到心动对象，不妨主动释放一些友好信号"
+                ]
+            },
+            {
+                minScore: 25,
+                maxScore: 34,
+                name: "中度暗恋可能",
+                desc: "你身边存在暗恋的可能性很高！你的某些特质可能吸引了他人的注意，但对方可能还在观察阶段，或者不确定你的心意。",
+                admirer: "暗恋者特征：可能是对你某方面特质特别欣赏的人",
+                predictions: [
+                    "近期可能会有人以请教问题为由接近你",
+                    "你可能会发现有人特别记得你说过的话",
+                    "社交活动中会有人特别想和你组队或合作"
+                ],
+                actions: [
+                    "多参与社交活动，扩大自己的社交圈",
+                    "注意观察谁对你的话题特别感兴趣",
+                    "保持友善微笑，给人亲切感"
+                ]
+            },
+            {
+                minScore: 15,
+                maxScore: 24,
+                name: "潜在暗恋可能",
+                desc: "你有被暗恋的潜力！虽然目前可能没有明显的暗恋者，但你的优点和特质正在被某些人注意到。多一点自信和社交互动，机会就会到来。",
+                admirer: "暗恋者特征：可能是默默关注你但不敢表达的人",
+                predictions: [
+                    "如果你多展示自己，暗恋的可能性会大大增加",
+                    "可能会有人通过间接方式了解你的信息",
+                    "你的社交动态会吸引更多关注"
+                ],
+                actions: [
+                    "多展示自己的兴趣爱好和特长",
+                    "主动与他人交流，增加曝光度",
+                    "保持积极乐观的生活态度"
+                ]
+            }
+        ];
+
+        // 测试状态
+        let currentQuestion = 0;
+        let answers = [];
+        let selectedOption = null;
+        let totalScore = 0;
+
+        // DOM元素
+        const questionContainer = document.getElementById('questionContainer');
+        const resultContainer = document.getElementById('resultContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // 初始化测试
+        function initTest() {
+            showQuestion();
+            updateProgress();
+            setupEventListeners();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            prevBtn.addEventListener('click', prevQuestion);
+            nextBtn.addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restartTest);
+        }
+
+        // 显示当前问题
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionText').textContent = question.text;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                if (answers[currentQuestion] === index) {
+                    optionElement.classList.add('selected');
+                }
+                
+                optionElement.innerHTML = `
+                    <div class="option-letter">${letters[index]}</div>
+                    <div class="option-text">${option.text}</div>
+                `;
+                
+                optionElement.addEventListener('click', () => selectOption(index, option.score));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // 更新按钮状态
+            prevBtn.style.display = currentQuestion === 0 ? 'none' : 'inline-block';
+            
+            // 更新下一题按钮文本
+            const nextBtnText = currentQuestion === questions.length - 1 ? 
+                '查看结果 <i class="fas fa-heart"></i>' : 
+                '下一题 <i class="fas fa-arrow-right"></i>';
+            nextBtn.innerHTML = nextBtnText;
+        }
+
+        // 选择选项
+        function selectOption(index, score) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+            
+            answers[currentQuestion] = index;
+            selectedOption = index;
+            
+            // 更新该题的分数
+            if (answers[currentQuestion] !== undefined) {
+                // 如果之前已经选过，需要减去之前的分数
+                if (answers[currentQuestion] !== index) {
+                    const prevScore = questions[currentQuestion].options[answers[currentQuestion]].score;
+                    totalScore -= prevScore;
+                }
+                totalScore += score;
+            }
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${currentQuestion + 1}/${questions.length}`;
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (answers[currentQuestion] === undefined) {
+                alert('请先选择一个答案再继续！');
+                return;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                selectedOption = answers[currentQuestion] !== undefined ? answers[currentQuestion] : null;
+                showQuestion();
+                updateProgress();
+            } else {
+                // 显示结果
+                showResults();
+            }
+        }
+
+        // 上一题
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = answers[currentQuestion] !== undefined ? answers[currentQuestion] : null;
+                showQuestion();
+                updateProgress();
+            }
+        }
+
+        // 显示结果
+        function showResults() {
+            // 计算总分
+            let finalScore = 0;
+            answers.forEach((answerIndex, questionIndex) => {
+                if (answerIndex !== undefined) {
+                    finalScore += questions[questionIndex].options[answerIndex].score;
+                }
+            });
+            
+            // 确定结果类型
+            let resultType = resultTypes[0]; // 默认值
+            
+            for (const type of resultTypes) {
+                if (finalScore >= type.minScore && finalScore <= type.maxScore) {
+                    resultType = type;
+                    break;
+                }
+            }
+            
+            // 计算暗恋指数 (70%-95%)
+            const baseScore = 70;
+            const scoreRatio = (finalScore - 15) / (45 - 15); // 将15-45分映射到0-1
+            const calculatedScore = baseScore + (scoreRatio * 25); // 70-95分
+            const matchPercentage = Math.min(Math.max(Math.round(calculatedScore), 70), 95);
+            
+            // 显示结果
+            questionContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            document.getElementById('matchPercentage').textContent = `${matchPercentage}%`;
+            document.getElementById('resultType').textContent = resultType.name;
+            document.getElementById('secretAdmirer').textContent = resultType.admirer;
+            document.getElementById('resultDesc').textContent = resultType.desc;
+            
+            // 更新预测列表
+            const predictionsList = document.getElementById('predictionsList');
+            predictionsList.innerHTML = '';
+            resultType.predictions.forEach(prediction => {
+                predictionsList.innerHTML += `
+                    <div class="prediction-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>${prediction}</div>
+                    </div>
+                `;
+            });
+            
+            // 更新行动建议列表
+            const actionsList = document.getElementById('actionsList');
+            actionsList.innerHTML = '';
+            resultType.actions.forEach(action => {
+                actionsList.innerHTML += `
+                    <div class="action-item">
+                        <div>${action}</div>
+                    </div>
+                `;
+            });
+            
+            // 更新分享链接
+            const shareText = `我的暗恋测试结果：${resultType.name}，暗恋指数${matchPercentage}%！快来测测有没有人在暗恋你吧！`;
+            const shareUrl = window.location.href;
+            
+            document.getElementById('shareWhatsApp').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+            document.getElementById('shareWeChat').onclick = function() {
+                alert('请点击微信右上角分享按钮或复制链接发送给朋友~');
+                return false;
+            };
+            
+            // 复制链接功能
+            document.getElementById('copyLink').addEventListener('click', function() {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('链接已复制！快去分享给朋友吧~');
+                });
+            });
+        }
+
+        // 重新开始测试
+        function restartTest() {
+            currentQuestion = 0;
+            answers = [];
+            selectedOption = null;
+            totalScore = 0;
+            
+            resultContainer.style.display = 'none';
+            questionContainer.style.display = 'block';
+            
+            initTest();
+        }
+
+        // 页面加载完成后初始化测试
+        document.addEventListener('DOMContentLoaded', initTest);
+    </script>
+</body>
+</html>
